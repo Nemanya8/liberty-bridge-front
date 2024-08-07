@@ -2,7 +2,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import FormComponente2g from '../components/FormComponente2g';
+import E2GFormComponent from '../components/E2GFormComponent';
 
 const Home: NextPage = () => {
   return (
@@ -27,7 +27,7 @@ const Home: NextPage = () => {
           <ConnectButton />
         </div>
         <div className={styles.rightPanel}>
-          <FormComponente2g />
+          <E2GFormComponent />
         </div>
       </main>
     </div>

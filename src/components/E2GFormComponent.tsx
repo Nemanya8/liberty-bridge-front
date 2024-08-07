@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  type BaseError,
-  useSendTransaction, 
-  useWaitForTransactionReceipt
-} from 'wagmi';
+import React, { useRef, useEffect } from 'react';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { abi } from '../abi';
 import { parseEther } from 'viem';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Keyframe animation for continuous gradient movement
 const keyframes = `
@@ -20,43 +19,61 @@ const keyframes = `
   }
 }`;
 
-const FormComponentg2e: React.FC = () => {
+const E2GFormComponent: React.FC = () => {
   const { 
     data: hash,
-    error, 
     isPending,
-    sendTransaction 
-  } = useSendTransaction();
-  
+    writeContract,
+    error 
+  } = useWriteContract();
+
   const formRef = useRef<HTMLFormElement | null>(null);
-  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (hash) {
+      toast.info('Transaction submitted');
+    }
+    if (error) {
+      toast.error(`Error: ${error.message}`);
+    }
+  }, [hash, error]);
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+      onSuccess(data) {
+        if (data.status === 1) {
+          toast.success('Transaction confirmed!');
+        } else {
+          toast.error('Transaction failed');
+        }
+      },
+      onError(error) {
+        toast.error(`Error checking transaction: ${error.message}`);
+      }
+    });
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const to = formData.get('address') as `0x${string}`;
     const value = formData.get('value') as string;
-    sendTransaction({ to, value: parseEther(value) });
-    if (formRef.current) {
-      formRef.current.reset();
+    const to = formData.get('address') as `0x${string}`;
+
+    try {
+      await writeContract({
+        address: '0x46a7Fc90c431124de31Ec87b8663e7B3D7C86dFB',
+        abi,
+        functionName: 'deposit',
+        args: [to],
+        value: parseEther(value),
+      });
+      if (formRef.current) {
+        formRef.current.reset();
+      }
+    } catch (error) {
+      toast.error(`Transaction failed: ${error.message}`);
     }
   }
-
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  useEffect(() => {
-    if (!isConfirming && hash && formRef.current) {
-      setMessage('Transaction successful!');
-    }
-  }, [isConfirming, hash]);
-
-  useEffect(() => {
-    if (error) {
-      setMessage(`Error: ${(error as BaseError).shortMessage || error.message}`);
-    }
-  }, [error]);
 
   const formStyle = {
     display: 'flex',
@@ -68,7 +85,7 @@ const FormComponentg2e: React.FC = () => {
     borderRadius: '15px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
     width: '70%',
-    height: '50vh',
+    height: '60vh',
     margin: '0 auto',
     fontFamily: 'Arial, sans-serif',
     position: 'relative'
@@ -121,25 +138,19 @@ const FormComponentg2e: React.FC = () => {
     animation: 'gradientShift 8s linear infinite', // Slower gradient animation
   };
 
-  const buttonHoverStyle = {
-    transform: 'scale(1.1)', // Make button 10% larger on hover
-  };
-
-  const messageStyle = {
-    marginBottom: '20px',
-    fontSize: '1rem',
-    color: '#333',
-    wordBreak: 'break-all',
-    textAlign: 'center',
-    visibility: message ? 'visible' : 'hidden',
-  };
-
   return (
     <>
       <style>{keyframes}</style>
+      <ToastContainer />
       <form ref={formRef} onSubmit={submit} style={formStyle}>
-        <h1>GETH 2 ETH</h1>
-        <div style={messageStyle}>{message}</div>
+        <h1 style={{
+          fontSize: '62px', /* Increased size for the title */
+          fontWeight: 'bold',
+          background: 'linear-gradient(90deg, red, blue)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '20px', /* Reduced space between the title and the ConnectButton */
+        }}>ETH 2 GETH</h1>
         <div style={formGroupStyle}>
           <input
             type="text"
@@ -163,9 +174,7 @@ const FormComponentg2e: React.FC = () => {
         <button
           disabled={isPending || isConfirming}
           type="submit"
-          style={Object.assign({}, buttonStyle)}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          style={buttonStyle}
         >
           {isPending || isConfirming ? 'Confirming...' : 'Transfer'}
         </button>
@@ -174,4 +183,4 @@ const FormComponentg2e: React.FC = () => {
   );
 };
 
-export default FormComponentg2e;
+export default E2GFormComponent;
