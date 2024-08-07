@@ -1,9 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  type BaseError,
-  useSendTransaction, 
-  useWaitForTransactionReceipt
-} from 'wagmi';
+import React, { useRef } from 'react';
+import { useWriteContract, useWaitForTransactionReceipt, BaseError } from 'wagmi';
+import { abi } from '../abi';
 import { parseEther } from 'viem';
 
 // Keyframe animation for continuous gradient movement
@@ -23,40 +20,36 @@ const keyframes = `
 const FormComponente2g: React.FC = () => {
   const { 
     data: hash,
-    error, 
     isPending,
-    sendTransaction 
-  } = useSendTransaction();
-  
-  const formRef = useRef<HTMLFormElement | null>(null);
-  const [message, setMessage] = useState('');
+    writeContract,
+    error 
+  } = useWriteContract();
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+  
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-    const to = formData.get('address') as `0x${string}`;
     const value = formData.get('value') as string;
-    sendTransaction({ to, value: parseEther(value) });
+    const to = formData.get('address') as `0x${string}`;
+
+    // Write transaction to the contract with Ether value
+    writeContract({
+      address: '0x46a7Fc90c431124de31Ec87b8663e7B3D7C86dFB',
+      abi,
+      functionName: 'deposit',
+      args: [to],
+      value: parseEther(value),
+    });
     if (formRef.current) {
       formRef.current.reset();
     }
   }
 
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  useEffect(() => {
-    if (!isConfirming && hash && formRef.current) {
-      setMessage('Transaction successful!');
-    }
-  }, [isConfirming, hash]);
-
-  useEffect(() => {
-    if (error) {
-      setMessage(`Error: ${(error as BaseError).shortMessage || error.message}`);
-    }
-  }, [error]);
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    });
 
   const formStyle = {
     display: 'flex',
@@ -68,7 +61,7 @@ const FormComponente2g: React.FC = () => {
     borderRadius: '15px',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
     width: '70%',
-    height: '50vh',
+    height: '60vh',
     margin: '0 auto',
     fontFamily: 'Arial, sans-serif',
     position: 'relative'
@@ -121,15 +114,6 @@ const FormComponente2g: React.FC = () => {
     animation: 'gradientShift 8s linear infinite', // Slower gradient animation
   };
 
-  const messageStyle = {
-    marginBottom: '20px',
-    fontSize: '1rem',
-    color: '#333',
-    wordBreak: 'break-all',
-    textAlign: 'center',
-    visibility: message ? 'visible' : 'hidden',
-  };
-
   return (
     <>
       <style>{keyframes}</style>
@@ -142,7 +126,6 @@ const FormComponente2g: React.FC = () => {
           WebkitTextFillColor: 'transparent',
           marginBottom: '20px', /* Reduced space between the title and the ConnectButton */
         }}>ETH 2 GETH</h1>
-        <div style={messageStyle}>{message}</div>
         <div style={formGroupStyle}>
           <input
             type="text"
@@ -170,6 +153,7 @@ const FormComponente2g: React.FC = () => {
         >
           {isPending || isConfirming ? 'Confirming...' : 'Transfer'}
         </button>
+        {hash && <div>Transaction Hash: {hash}</div>}
       </form>
     </>
   );
