@@ -1,3 +1,25 @@
+@keyframes flyUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes flyIn {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .container {
   min-height: 100vh;
   display: flex;
@@ -26,17 +48,17 @@
 }
 
 .logo {
-  width: 200px; /* Adjusted size to be smaller */
+  width: 200px;
   height: auto;
 }
 
 .title {
-  font-size: 62px; /* Increased size for the title */
+  font-size: 62px;
   font-weight: bold;
   background: linear-gradient(90deg, red, blue);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 20px; /* Reduced space between the title and the ConnectButton */
+  margin-bottom: 20px;
 }
 
 .rightPanel {
@@ -44,10 +66,31 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: '50vh';
 }
 
 .formContainer {
   width: 70%;
-  max-width: 1200px; /* Increased max-width for a larger form */
+  max-width: 1200px;
+}
+
+.toggleButton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.toggleButton:hover {
+  background-color: #005bb5;
+}
+
+.flyUp {
+  animation: flyUp 0.5s forwards;
+}
+
+.flyIn {
+  animation: flyIn 0.5s forwards;
 }

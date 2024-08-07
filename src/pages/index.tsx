@@ -1,10 +1,23 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import { useState } from 'react';
 import styles from '../styles/Home.module.css';
 import E2GFormComponent from '../components/E2GFormComponent';
+import G2EFormComponent from '../components/G2EFormComponent';
 
 const Home: NextPage = () => {
+  const [isE2G, setIsE2G] = useState(true);
+  const [animation, setAnimation] = useState('');
+
+  const toggleComponent = () => {
+    setAnimation(styles.flyUp);
+    setTimeout(() => {
+      setIsE2G(!isE2G);
+      setAnimation(styles.flyIn);
+    }, 500);
+  };
+
   return (
     <div className={styles.container}>
       <Head>
@@ -25,9 +38,12 @@ const Home: NextPage = () => {
           />
           <h1 className={styles.title}>Liberty Bridge</h1>
           <ConnectButton />
+          <button className={styles.toggleButton} onClick={toggleComponent}>
+            {isE2G ? 'Switch to G2E' : 'Switch to E2G'}
+          </button>
         </div>
-        <div className={styles.rightPanel}>
-          <E2GFormComponent />
+        <div className={`${styles.rightPanel} ${animation}`}>
+          {isE2G ? <E2GFormComponent /> : <G2EFormComponent />}
         </div>
       </main>
     </div>

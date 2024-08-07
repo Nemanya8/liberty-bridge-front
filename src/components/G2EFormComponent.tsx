@@ -5,7 +5,6 @@ import { parseEther } from 'viem';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Keyframe animation for continuous gradient movement
 const keyframes = `
 @keyframes gradientShift {
   0% {
@@ -19,7 +18,7 @@ const keyframes = `
   }
 }`;
 
-const E2GFormComponent: React.FC = () => {
+const G2EFormComponent: React.FC = () => {
   const { 
     data: hash,
     isPending,
@@ -53,38 +52,27 @@ const E2GFormComponent: React.FC = () => {
       }
     });
 
-    async function submit(e: React.FormEvent<HTMLFormElement>) {
-      e.preventDefault();
-      const formData = new FormData(e.target as HTMLFormElement);
-      const value = formData.get('value') as string;
-      const to = formData.get('address') as string;
-    
-      // Validation Function
-      const validateAddress = (address: string) => {
-        return address.startsWith('g1') && address.length === 40;
-      };
-    
-      if (!validateAddress(to)) {
-        toast.error('Invalid address. It must start with "g1" and be 40 characters long.');
-        return;
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const value = formData.get('value') as string;
+    const to = formData.get('address') as `0x${string}`;
+
+    try {
+      await writeContract({
+        address: '0x54e0bc34D8F4597dba4974Aa6554c959448919A4',
+        abi,
+        functionName: 'deposit',
+        args: [to],
+        value: parseEther(value),
+      });
+      if (formRef.current) {
+        formRef.current.reset();
       }
-    
-      try {
-        await writeContract({
-          address: '0xC73001b326CF8ffF22497928Fe95d565b3465649',
-          abi,
-          functionName: 'deposit',
-          args: [to],
-          value: parseEther(value),
-        });
-        if (formRef.current) {
-          formRef.current.reset();
-        }
-      } catch (error) {
-        toast.error(`Transaction failed: ${error.message}`);
-      }
+    } catch (error) {
+      toast.error(`Transaction failed: ${error.message}`);
     }
-    
+  }
 
   const formStyle = {
     display: 'flex',
@@ -161,7 +149,7 @@ const E2GFormComponent: React.FC = () => {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           marginBottom: '20px', /* Reduced space between the title and the ConnectButton */
-        }}>ETH 2 GETH</h1>
+        }}>GETH 2 ETH</h1>
         <div style={formGroupStyle}>
           <input
             type="text"
@@ -194,4 +182,4 @@ const E2GFormComponent: React.FC = () => {
   );
 };
 
-export default E2GFormComponent;
+export default G2EFormComponent;
